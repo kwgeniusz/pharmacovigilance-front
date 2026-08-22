@@ -155,13 +155,8 @@ watch(() => route.fullPath, handleRouteChange, { immediate: true })
 
 <template>
   <section>
-    <header class="page-heading">
-      <div>
-        <p class="eyebrow">Recall response workspace</p>
-        <h1>Find affected buyers</h1>
-        <p>Search a medication lot, review matching purchases, and notify each buyer safely.</p>
-      </div>
-      <span class="security-note"><CheckCircle2 :size="17" /> Secure pharmacy session</span>
+    <header class="page-heading page-heading--compact">
+      <h1>Order Search</h1>
     </header>
 
     <section class="panel search-panel">
@@ -186,27 +181,22 @@ watch(() => route.fullPath, handleRouteChange, { immediate: true })
     <template v-else>
       <section v-if="activeMedication" class="medication-summary">
         <span class="medication-summary__icon"><PackageSearch :size="23" /></span>
-        <div>
-          <small>Affected medication</small><strong>{{ activeMedication.name }}</strong>
+        <div class="medication-summary__identity">
+          <strong>{{ activeMedication.name }}</strong>
+          <span>Lot {{ activeMedication.lot_number }}</span>
         </div>
-        <div>
-          <small>Lot number</small><strong>{{ activeMedication.lot_number }}</strong>
-        </div>
-        <div>
-          <small>Date window</small
-          ><strong>{{ filters.start_date }} – {{ filters.end_date }}</strong>
-        </div>
-        <div>
-          <small>Matching orders</small><strong>{{ meta?.total ?? orders.length }}</strong>
-        </div>
+        <span class="medication-summary__meta"
+          >{{ filters.start_date }} – {{ filters.end_date }}</span
+        >
+        <strong class="medication-summary__count"
+          >{{ meta?.total ?? orders.length }}
+          {{ (meta?.total ?? orders.length) === 1 ? 'order' : 'orders' }}</strong
+        >
       </section>
 
       <section class="panel results-panel">
         <header class="panel__header">
-          <div>
-            <p class="eyebrow">Search results</p>
-            <h2>Affected purchase records</h2>
-          </div>
+          <h2>Order Results</h2>
           <span v-if="meta" class="result-count"
             >{{ meta.total }} {{ meta.total === 1 ? 'order' : 'orders' }}</span
           >

@@ -18,8 +18,7 @@ async function handleLogout() {
       <RouterLink class="brand" :to="{ name: 'orders' }" aria-label="Pharmacovigilance home">
         <span class="brand__mark"><ShieldCheck :size="22" /></span>
         <span>
-          <strong>Pharmacovigilance</strong>
-          <small>Medication safety operations</small>
+          <strong>Pharmacovigilance Alert System</strong>
         </span>
       </RouterLink>
 

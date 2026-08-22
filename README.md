@@ -107,21 +107,17 @@ npm run dev
 npm run format
 npm run lint
 npm run type-check
-npm run test:unit -- --run
 npm run build
 npm run preview
 ```
 
-## Tests
+## Quality checks
 
-The unit and component tests cover authentication, route guards, CSRF recovery, form validation, search parameters, order results, detail screens and alert confirmation.
-
-Run the full frontend verification with:
+Frontend verification uses static analysis and a production build. Automated tests are maintained in the Laravel API repository.
 
 ```bash
 npm run lint
 npm run type-check
-npm run test:unit -- --run
 npm run build
 ```
 

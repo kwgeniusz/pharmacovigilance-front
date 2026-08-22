@@ -34,10 +34,7 @@ function submit() {
   <form class="search-form" novalidate @submit.prevent="submit">
     <div class="search-form__heading">
       <span class="section-icon"><Search :size="20" /></span>
-      <span>
-        <strong>Medication lookup</strong>
-        <small>Search purchase records by affected lot and date range.</small>
-      </span>
+      <strong>Medication Search</strong>
     </div>
 
     <div class="field search-form__lot">
@@ -83,7 +80,7 @@ function submit() {
     <button class="button button--primary search-form__button" type="submit" :disabled="loading">
       <span v-if="loading" class="spinner" aria-hidden="true"></span>
       <Search v-else :size="18" />
-      {{ loading ? 'Searching…' : 'Search orders' }}
+      {{ loading ? 'Searching…' : 'Search' }}
     </button>
   </form>
 </template>

@@ -26,7 +26,7 @@ onMounted(async () => {
 <template>
   <section>
     <RouterLink class="back-link" :to="{ name: 'orders', query: route.query }"
-      ><ArrowLeft :size="17" /> Back to affected orders</RouterLink
+      ><ArrowLeft :size="17" /> Back to Order Results</RouterLink
     >
     <LoadingState v-if="loading" label="Loading buyer details" />
     <div v-else-if="errorMessage" class="error-panel" role="alert">
@@ -38,9 +38,8 @@ onMounted(async () => {
     <template v-else-if="customer">
       <header class="page-heading detail-heading">
         <div>
-          <p class="eyebrow">Buyer profile</p>
-          <h1>{{ customer.name }}</h1>
-          <p>Review contact information and complete medication purchase history.</p>
+          <h1>Customer Details</h1>
+          <p>{{ customer.name }}</p>
         </div>
         <span class="security-note"><UserRound :size="17" /> Customer #{{ customer.id }}</span>
       </header>
@@ -64,8 +63,7 @@ onMounted(async () => {
       <section class="panel history-panel">
         <header class="panel__header">
           <div>
-            <p class="eyebrow">Purchase history</p>
-            <h2>Customer orders</h2>
+            <h2>Order History</h2>
           </div>
           <span class="item-count">{{ customer.orders?.length ?? 0 }}</span>
         </header>

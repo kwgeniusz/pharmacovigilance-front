@@ -17,12 +17,12 @@ function detailQuery() {
     <table class="orders-table">
       <thead>
         <tr>
-          <th>Order</th>
+          <th>Order ID</th>
           <th>Customer</th>
           <th>Contact</th>
-          <th>Purchase date</th>
+          <th>Purchase Date</th>
           <th>Medication</th>
-          <th><span class="sr-only">Actions</span></th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -56,14 +56,23 @@ function detailQuery() {
           <td>
             <div class="row-actions">
               <RouterLink
-                class="icon-button"
+                class="table-action"
                 :to="{ name: 'order-details', params: { orderId: order.id }, query: detailQuery() }"
                 :aria-label="`View order ${order.id}`"
                 title="View order"
-                ><Eye :size="17"
-              /></RouterLink>
+                ><Eye :size="16" /> View Order</RouterLink
+              >
+              <button
+                class="table-action table-action--warning"
+                type="button"
+                :aria-label="`Alert buyer ${order.customer.name}`"
+                title="Alert buyer"
+                @click="emit('alert', order)"
+              >
+                <BellRing :size="16" /> Alert Buyer
+              </button>
               <RouterLink
-                class="icon-button"
+                class="table-action"
                 :to="{
                   name: 'customer-details',
                   params: { customerId: order.customer.id },
@@ -71,17 +80,8 @@ function detailQuery() {
                 }"
                 :aria-label="`View buyer ${order.customer.name}`"
                 title="View buyer"
-                ><UserRound :size="17"
-              /></RouterLink>
-              <button
-                class="icon-button icon-button--warning"
-                type="button"
-                :aria-label="`Alert buyer ${order.customer.name}`"
-                title="Alert buyer"
-                @click="emit('alert', order)"
+                ><UserRound :size="16" /> View Buyer</RouterLink
               >
-                <BellRing :size="17" />
-              </button>
             </div>
           </td>
         </tr>
@@ -114,8 +114,15 @@ function detailQuery() {
           <RouterLink
             class="button button--secondary button--small"
             :to="{ name: 'order-details', params: { orderId: order.id }, query: detailQuery() }"
-            ><Eye :size="15" /> View</RouterLink
+            ><Eye :size="15" /> View Order</RouterLink
           >
+          <button
+            class="button button--warning button--small"
+            type="button"
+            @click="emit('alert', order)"
+          >
+            <BellRing :size="15" /> Alert Buyer
+          </button>
           <RouterLink
             class="button button--secondary button--small"
             :to="{
@@ -123,15 +130,8 @@ function detailQuery() {
               params: { customerId: order.customer.id },
               query: detailQuery(),
             }"
-            ><UserRound :size="15" /> Buyer</RouterLink
+            ><UserRound :size="15" /> View Buyer</RouterLink
           >
-          <button
-            class="button button--warning button--small"
-            type="button"
-            @click="emit('alert', order)"
-          >
-            <BellRing :size="15" /> Alert
-          </button>
         </footer>
       </article>
     </div>

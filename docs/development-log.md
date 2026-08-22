@@ -25,7 +25,9 @@ nvm alias default lts/*
 npm install --global npm@12.0.2
 ```
 
-**Configuration:** TypeScript, Vue Router, Pinia, Vitest, ESLint, and Prettier enabled; JSX, end-to-end testing, and experimental Vue DevTools omitted. Node 24.19.0 LTS is pinned in `.nvmrc`; npm 12.0.2 is declared in `package.json`.
+**Configuration:** TypeScript, Vue Router, Pinia, ESLint, and Prettier enabled; JSX, frontend automated testing, and experimental Vue DevTools omitted. Node 24.19.0 LTS is pinned in `.nvmrc`; npm 12.0.2 is declared in `package.json`.
+
+**Testing note:** Vitest was selected during the initial scaffold and later removed. Automated test coverage is maintained only in the Laravel API repository.
 
 **Dependency note:** `create-vue` generated mismatched `oxlint` packages. Both were aligned to `~1.79.0`, their current compatible release. The deprecated `lucide-vue-next` package was replaced with `@lucide/vue`.
 
@@ -71,17 +73,7 @@ npm install --global npm@12.0.2
 
 **Status:** Implemented; pending commit.
 
-## 7. `test: add frontend component coverage`
-
-**Purpose:** Cover authentication, routing, validation, search states, pagination, details, and alert behavior with Vitest.
-
-**Files:** Eight focused spec files under `src/__tests__` and the Vitest configuration compatibility fix.
-
-**Verification:** Unit tests cover credentials, session restoration, CSRF refresh, `401`/`419`, search validation, results, details, and alert confirmation.
-
-**Status:** Implemented; pending commit.
-
-## 8. `docs: document frontend setup and decisions`
+## 7. `docs: document frontend setup and decisions`
 
 **Purpose:** Document setup, design decisions, assumptions, API integration, verification, and the proposed commit sequence.
 
@@ -93,10 +85,9 @@ npm install --global npm@12.0.2
 
 | Check | Result |
 | --- | --- |
-| Dependency installation | 373 packages audited; 0 vulnerabilities; no engine warnings under Node 24.19.0 and npm 12.0.2. |
+| Dependency installation | Completed without engine warnings under Node 24.19.0 and npm 12.0.2. |
 | `npm run lint` | Passed Oxlint and ESLint. |
 | `npm run type-check` | Passed Vue TypeScript validation. |
-| `npm run test:unit -- --run` | 8 files and 16 tests passed. |
 | `npm run build` | Production bundle generated successfully. |
 | Vite smoke test | `/` and `/pharmacovigilance/orders` returned `200`. |
 | Laravel integration | Sanctum login and lot `951357` order search returned `200`; 2 seeded matching orders found. |

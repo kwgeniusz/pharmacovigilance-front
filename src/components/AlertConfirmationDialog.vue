@@ -34,8 +34,7 @@ function close() {
       <header class="alert-dialog__header">
         <span class="warning-icon"><AlertTriangle :size="24" /></span>
         <div>
-          <p class="eyebrow">Recall notification</p>
-          <h2>Alert this buyer?</h2>
+          <h2>Send Alert to Customer</h2>
         </div>
         <button
           class="dialog-close"
@@ -96,7 +95,7 @@ function close() {
         >
           <span v-if="sending" class="spinner" aria-hidden="true"></span>
           <Mail v-else :size="17" />
-          {{ sending ? 'Sending…' : 'Send warning email' }}
+          {{ sending ? 'Sending…' : 'Send Email' }}
         </button>
       </footer>
     </div>
