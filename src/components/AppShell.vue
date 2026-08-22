@@ -24,7 +24,7 @@ async function handleLogout() {
 
       <div class="account-menu">
         <span class="account-menu__user">
-          <small>Signed in as</small>
+          <small>{{ auth.user?.role === 'administrator' ? 'Administrator' : 'Operator' }}</small>
           <strong>{{ auth.user?.username }}</strong>
         </span>
         <button class="button button--ghost" type="button" @click="handleLogout">

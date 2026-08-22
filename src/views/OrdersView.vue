@@ -1,18 +1,25 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { AlertCircle, CheckCircle2, PackageSearch, RefreshCw } from '@lucide/vue'
+import { AlertCircle, CheckCircle2, Download, PackageSearch, RefreshCw } from '@lucide/vue'
 import AlertConfirmationDialog from '@/components/AlertConfirmationDialog.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import OrdersResults from '@/components/OrdersResults.vue'
 import PaginationControls from '@/components/PaginationControls.vue'
 import SearchFiltersForm from '@/components/SearchFiltersForm.vue'
 import { getErrorMessage, getFieldErrors } from '@/api/http'
-import { searchMedications, searchOrders, sendBuyerAlert } from '@/api/pharmacovigilance'
+import {
+  exportOrders,
+  searchMedications,
+  searchOrders,
+  sendBuyerAlert,
+} from '@/api/pharmacovigilance'
+import { useAuthStore } from '@/stores/auth'
 import type { Medication, Order, PaginationMeta, SearchFilters } from '@/types/api'
 
 const route = useRoute()
 const router = useRouter()
+const auth = useAuthStore()
 
 const formatDate = (date: Date) => {
   const year = date.getFullYear()
@@ -41,6 +48,8 @@ const alertOrder = ref<Order | null>(null)
 const sendingAlert = ref(false)
 const alertError = ref('')
 const toast = ref('')
+const toastIsError = ref(false)
+const exporting = ref(false)
 
 const activeMedication = computed(() => medications.value[0])
 
@@ -118,6 +127,7 @@ async function confirmAlert() {
   try {
     const response = await sendBuyerAlert(alertOrder.value.id, filters.value.lot_number)
     closeAlert()
+    toastIsError.value = false
     toast.value = response.message
     window.setTimeout(() => (toast.value = ''), 4500)
   } catch (error) {
@@ -126,6 +136,30 @@ async function confirmAlert() {
       fields.lot_number?.[0] ?? getErrorMessage(error, 'Unable to send the warning email.')
   } finally {
     sendingAlert.value = false
+  }
+}
+
+async function downloadCsv() {
+  if (auth.user?.role !== 'administrator' || exporting.value) return
+
+  exporting.value = true
+
+  try {
+    const csv = await exportOrders(filters.value)
+    const url = URL.createObjectURL(csv)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `affected-orders-${filters.value.lot_number}.csv`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.setTimeout(() => URL.revokeObjectURL(url), 0)
+  } catch (error) {
+    toastIsError.value = true
+    toast.value = getErrorMessage(error, 'Unable to export affected orders.')
+    window.setTimeout(() => (toast.value = ''), 4500)
+  } finally {
+    exporting.value = false
   }
 }
 
@@ -157,6 +191,17 @@ watch(() => route.fullPath, handleRouteChange, { immediate: true })
   <section>
     <header class="page-heading page-heading--compact">
       <h1>Order Search</h1>
+      <button
+        v-if="auth.user?.role === 'administrator'"
+        class="button button--secondary"
+        type="button"
+        :disabled="loading || exporting || !meta?.total"
+        @click="downloadCsv"
+      >
+        <span v-if="exporting" class="spinner" aria-hidden="true"></span>
+        <Download v-else :size="17" />
+        {{ exporting ? 'Exporting…' : 'Export CSV' }}
+      </button>
     </header>
 
     <section class="panel search-panel">
@@ -225,7 +270,11 @@ watch(() => route.fullPath, handleRouteChange, { immediate: true })
     />
 
     <Transition name="toast">
-      <div v-if="toast" class="toast" role="status"><CheckCircle2 :size="19" />{{ toast }}</div>
+      <div v-if="toast" class="toast" :class="{ 'toast--error': toastIsError }" role="status">
+        <AlertCircle v-if="toastIsError" :size="19" />
+        <CheckCircle2 v-else :size="19" />
+        {{ toast }}
+      </div>
     </Transition>
   </section>
 </template>

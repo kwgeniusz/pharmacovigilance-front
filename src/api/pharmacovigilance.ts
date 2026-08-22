@@ -20,6 +20,19 @@ export async function searchOrders(filters: SearchFilters) {
   return response.data
 }
 
+export async function exportOrders(filters: SearchFilters) {
+  const response = await http.get<Blob>('/api/orders/export', {
+    params: {
+      lot_number: filters.lot_number,
+      start_date: filters.start_date,
+      end_date: filters.end_date,
+    },
+    responseType: 'blob',
+  })
+
+  return response.data
+}
+
 export async function getOrder(orderId: number) {
   const response = await http.get<ApiResource<Order>>(`/api/orders/${orderId}`)
   return response.data.data

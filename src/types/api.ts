@@ -1,6 +1,9 @@
+export type UserRole = 'administrator' | 'operator'
+
 export interface User {
   id: number
   username: string
+  role: UserRole
 }
 
 export interface Medication {

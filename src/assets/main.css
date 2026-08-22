@@ -920,6 +920,12 @@ h2 {
   font-weight: 750;
 }
 
+.toast--error {
+  border-color: #f3b6b6;
+  background: #fff5f5;
+  color: var(--red-700);
+}
+
 .toast-enter-active,
 .toast-leave-active {
   transition: all 180ms ease;
