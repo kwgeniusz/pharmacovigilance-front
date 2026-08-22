@@ -7,12 +7,31 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies and package manager caches
 node_modules
-.DS_Store
+.npm
+.pnpm-store
+
+# Build and test output
 dist
 dist-ssr
 coverage
+
+# Local environment files (keep the documented template)
+.env
+.env.*
+!.env.example
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Local overrides and temporary files
 *.local
+*.tmp
+*.temp
+*.tsbuildinfo
+.eslintcache
 
 # Editor directories and files
 .vscode/*
@@ -23,10 +42,6 @@ coverage
 *.njsproj
 *.sln
 *.sw?
-
-*.tsbuildinfo
-
-.eslintcache
 
 # Cypress
 /cypress/videos/
