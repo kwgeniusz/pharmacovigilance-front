@@ -16,7 +16,7 @@ The Node.js version is defined in `.nvmrc`.
 ```bash
 nvm install
 nvm use
-npm install
+npm ci
 cp .env.example .env
 npm run dev
 ```
@@ -33,18 +33,19 @@ cd ../pharmacovigilance-api
 
 Local test data:
 
-- Username: `admin`
-- Password: `password`
+- Administrator: `admin` / `password`
+- Operator: `operator` / `password`
 - Medication lot: `951357`
 - Mailpit: `http://localhost:8025`
 
 ## Main workflow
 
-1. Log in with the administrator account.
+1. Log in as administrator to test every feature, including CSV export.
 2. Search for a medication lot and select a date range.
 3. Review the matching orders and customer information.
 4. Open an order or customer record when more information is needed.
 5. Confirm the alert to send an email to the affected customer.
+6. As an administrator, export all orders matching the active filters to CSV.
 
 Search parameters are stored in the URL, so filters and pagination are preserved when navigating between results and detail pages.
 
@@ -77,6 +78,8 @@ The HTTP client also handles these responses:
 
 The order search sends `lot_number`, `start_date`, `end_date`, and `page`. Paginated responses use Laravel's `data`, `links`, and `meta` fields.
 
+The authenticated user has an `administrator` or `operator` role. Only administrators see the CSV export action. The API returns `403` if an operator calls the export endpoint. The downloaded file uses the active filters and includes all matching orders.
+
 ## Project structure
 
 ```text
@@ -95,6 +98,7 @@ src/
 - Vue 3, TypeScript and the Composition API are used throughout the application.
 - Vue Router controls public and authenticated routes.
 - Pinia stores only authentication state. Search state remains in the route query.
+- Role information is stored with the authenticated user and controls administrator-only actions.
 - Axios configuration and endpoint functions are separated under `src/api`.
 - The interface uses project CSS and Lucide icons instead of a component framework.
 - The alert confirmation uses the native `dialog` element and prevents duplicate submissions.
@@ -113,7 +117,7 @@ npm run preview
 
 ## Quality checks
 
-Frontend verification uses static analysis and a production build. Automated tests are maintained in the Laravel API repository.
+Run lint, type checking, and the production build before submitting. Backend behavior is covered by Pest.
 
 ```bash
 npm run lint
@@ -123,9 +127,9 @@ npm run build
 
 ## Assumptions
 
-- The API is available at `http://localhost:8000`.
-- The Vue development server uses `http://localhost:5173`.
+- The API is available at `http://localhost:8000` and Vue at `http://localhost:5173`.
 - A month is treated as an inclusive rolling 30-day period.
 - Alerts are sent to one customer at a time by email.
+- Administrators can export filtered orders; operators cannot access CSV export.
 - Lot `951357` is included in the seeded backend data.
-- SMS notifications, bulk alerts, CSV export, roles and alert history are outside the required scope.
+- SMS notifications, bulk alerts and alert history are outside the implemented scope.
