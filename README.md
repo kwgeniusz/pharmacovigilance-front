@@ -6,16 +6,13 @@ Vue 3 application used to locate purchases associated with a medication lot and 
 
 ### Requirements
 
-- NVM
-- Node.js 24.19.0
-- npm 12.0.2
+- Node.js 24.15 or newer (the recommended version is defined in `.nvmrc`)
+- npm
 - Pharmacovigilance API running on `http://localhost:8000`
 
-The Node.js version is defined in `.nvmrc`.
+### Install and run
 
 ```bash
-nvm install
-nvm use
 npm ci
 cp .env.example .env
 npm run dev
@@ -23,20 +20,8 @@ npm run dev
 
 The application will be available at `http://localhost:5173`.
 
-To start the backend from the parent directory:
-
-```bash
-cd ../pharmacovigilance-api
-./vendor/bin/sail up -d
-./vendor/bin/sail artisan migrate:fresh --seed
-```
-
-Local test data:
-
-- Administrator: `admin` / `password`
-- Operator: `operator` / `password`
-- Medication lot: `951357`
-- Mailpit: `http://localhost:8025`
+The API is a separate project and must be started independently. Its installation,
+database, seed data, and local services are documented in the API repository.
 
 ## Main workflow
 
@@ -102,7 +87,7 @@ src/
 - Axios configuration and endpoint functions are separated under `src/api`.
 - The interface uses project CSS and Lucide icons instead of a component framework.
 - The alert confirmation uses the native `dialog` element and prevents duplicate submissions.
-- The frontend runs with Vite outside Docker. Laravel Sail provides the API, MySQL and Mailpit services.
+- The frontend runs locally with Vite and consumes the API configured in `.env`.
 
 ## Available scripts
 
@@ -117,19 +102,10 @@ npm run preview
 
 ## Quality checks
 
-Run lint, type checking, and the production build before submitting. Backend behavior is covered by Pest.
+Run lint, type checking, and the production build before submitting.
 
 ```bash
 npm run lint
 npm run type-check
 npm run build
 ```
-
-## Assumptions
-
-- The API is available at `http://localhost:8000` and Vue at `http://localhost:5173`.
-- A month is treated as an inclusive rolling 30-day period.
-- Alerts are sent to one customer at a time by email.
-- Administrators can export filtered orders; operators cannot access CSV export.
-- Lot `951357` is included in the seeded backend data.
-- SMS notifications, bulk alerts and alert history are outside the implemented scope.
