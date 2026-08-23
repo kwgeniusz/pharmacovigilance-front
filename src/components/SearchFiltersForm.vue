@@ -18,9 +18,15 @@ watch(
 function submit() {
   Object.keys(errors).forEach((key) => delete errors[key])
 
-  if (!form.lot_number.trim()) errors.lot_number = 'Lot number is required.'
-  if (!form.start_date) errors.start_date = 'Start date is required.'
-  if (!form.end_date) errors.end_date = 'End date is required.'
+  if (form.lot_number.trim() && !/^\d{6}$/.test(form.lot_number.trim())) {
+    errors.lot_number = 'Lot number must contain exactly 6 digits.'
+  }
+  if (form.start_date && !/^\d{4}-\d{2}-\d{2}$/.test(form.start_date)) {
+    errors.start_date = 'Start date must use the YYYY-MM-DD format.'
+  }
+  if (form.end_date && !/^\d{4}-\d{2}-\d{2}$/.test(form.end_date)) {
+    errors.end_date = 'End date must use the YYYY-MM-DD format.'
+  }
   if (form.start_date && form.end_date && form.start_date > form.end_date) {
     errors.end_date = 'End date must be on or after the start date.'
   }
@@ -43,6 +49,8 @@ function submit() {
         id="lot-number"
         v-model="form.lot_number"
         inputmode="numeric"
+        pattern="[0-9]{6}"
+        maxlength="6"
         placeholder="e.g. 951357"
         :aria-invalid="Boolean(errors.lot_number)"
       />

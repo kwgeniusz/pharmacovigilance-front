@@ -21,20 +21,10 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 
-const formatDate = (date: Date) => {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-const today = new Date()
-const thirtyDaysAgo = new Date()
-thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-
 const defaultFilters: SearchFilters = {
-  lot_number: '951357',
-  start_date: formatDate(thirtyDaysAgo),
-  end_date: formatDate(today),
+  lot_number: '',
+  start_date: '',
+  end_date: '',
   page: 1,
 }
 
@@ -45,6 +35,7 @@ const meta = ref<PaginationMeta | null>(null)
 const loading = ref(false)
 const errorMessage = ref('')
 const alertOrder = ref<Order | null>(null)
+const alertLotNumber = ref('')
 const sendingAlert = ref(false)
 const alertError = ref('')
 const toast = ref('')
@@ -52,6 +43,14 @@ const toastIsError = ref(false)
 const exporting = ref(false)
 
 const activeMedication = computed(() => medications.value[0])
+const activeDateRange = computed(() => {
+  if (filters.value.start_date && filters.value.end_date) {
+    return `${filters.value.start_date} – ${filters.value.end_date}`
+  }
+  if (filters.value.start_date) return `From ${filters.value.start_date}`
+  if (filters.value.end_date) return `Until ${filters.value.end_date}`
+  return ''
+})
 
 function filtersFromRoute(): SearchFilters {
   return {
@@ -76,7 +75,9 @@ async function loadResults() {
 
   try {
     const [medicationData, orderData] = await Promise.all([
-      searchMedications(filters.value.lot_number),
+      filters.value.lot_number
+        ? searchMedications(filters.value.lot_number)
+        : Promise.resolve([]),
       searchOrders(filters.value),
     ])
     medications.value = medicationData
@@ -95,13 +96,15 @@ async function loadResults() {
 }
 
 async function applySearch(nextFilters: SearchFilters) {
-  const target = {
-    lot_number: nextFilters.lot_number,
-    start_date: nextFilters.start_date,
-    end_date: nextFilters.end_date,
-    page: String(nextFilters.page),
-  }
-  const unchanged = Object.entries(target).every(([key, value]) => route.query[key] === value)
+  const target: Record<string, string> = {}
+  if (nextFilters.lot_number) target.lot_number = nextFilters.lot_number
+  if (nextFilters.start_date) target.start_date = nextFilters.start_date
+  if (nextFilters.end_date) target.end_date = nextFilters.end_date
+
+  const current = Object.fromEntries(
+    Object.entries(route.query).filter(([, value]) => typeof value === 'string'),
+  )
+  const unchanged = JSON.stringify(current) === JSON.stringify(target)
   if (unchanged) await loadResults()
   else await router.push({ name: 'orders', query: target })
 }
@@ -112,11 +115,13 @@ function changePage(page: number) {
 
 function openAlert(order: Order) {
   alertOrder.value = order
+  alertLotNumber.value = filters.value.lot_number
   alertError.value = ''
 }
 
 function closeAlert() {
   alertOrder.value = null
+  alertLotNumber.value = ''
   alertError.value = ''
 }
 
@@ -125,7 +130,7 @@ async function confirmAlert() {
   sendingAlert.value = true
   alertError.value = ''
   try {
-    const response = await sendBuyerAlert(alertOrder.value.id, filters.value.lot_number)
+    const response = await sendBuyerAlert(alertOrder.value.id, alertLotNumber.value)
     closeAlert()
     toastIsError.value = false
     toast.value = response.message
@@ -149,7 +154,7 @@ async function downloadCsv() {
     const url = URL.createObjectURL(csv)
     const link = document.createElement('a')
     link.href = url
-    link.download = `affected-orders-${filters.value.lot_number}.csv`
+    link.download = `affected-orders-${filters.value.lot_number || 'all'}.csv`
     document.body.appendChild(link)
     link.click()
     link.remove()
@@ -164,23 +169,6 @@ async function downloadCsv() {
 }
 
 async function handleRouteChange() {
-  const hasSearchQuery = ['lot_number', 'start_date', 'end_date', 'page'].every(
-    (key) => typeof route.query[key] === 'string',
-  )
-
-  if (!hasSearchQuery) {
-    await router.replace({
-      name: 'orders',
-      query: {
-        lot_number: defaultFilters.lot_number,
-        start_date: defaultFilters.start_date,
-        end_date: defaultFilters.end_date,
-        page: '1',
-      },
-    })
-    return
-  }
-
   await loadResults()
 }
 
@@ -230,9 +218,7 @@ watch(() => route.fullPath, handleRouteChange, { immediate: true })
           <strong>{{ activeMedication.name }}</strong>
           <span>Lot {{ activeMedication.lot_number }}</span>
         </div>
-        <span class="medication-summary__meta"
-          >{{ filters.start_date }} – {{ filters.end_date }}</span
-        >
+        <span v-if="activeDateRange" class="medication-summary__meta">{{ activeDateRange }}</span>
         <strong class="medication-summary__count"
           >{{ meta?.total ?? orders.length }}
           {{ (meta?.total ?? orders.length) === 1 ? 'order' : 'orders' }}</strong
@@ -248,13 +234,17 @@ watch(() => route.fullPath, handleRouteChange, { immediate: true })
         </header>
 
         <div v-if="orders.length">
-          <OrdersResults :orders="orders" :lot-number="filters.lot_number" @alert="openAlert" />
+          <OrdersResults
+            :orders="orders"
+            :alert-lot-number="filters.lot_number"
+            @alert="openAlert"
+          />
           <PaginationControls v-if="meta" :meta="meta" @change="changePage" />
         </div>
         <div v-else class="empty-results">
           <PackageSearch :size="42" />
-          <h2>No affected orders found</h2>
-          <p>No purchases matched lot {{ filters.lot_number }} in the selected date range.</p>
+          <h2>No orders found</h2>
+          <p>No orders matched the selected filters.</p>
         </div>
       </section>
     </template>
@@ -262,7 +252,7 @@ watch(() => route.fullPath, handleRouteChange, { immediate: true })
     <AlertConfirmationDialog
       :open="Boolean(alertOrder)"
       :order="alertOrder"
-      :lot-number="filters.lot_number"
+      :lot-number="alertLotNumber"
       :sending="sendingAlert"
       :error="alertError"
       @close="closeAlert"

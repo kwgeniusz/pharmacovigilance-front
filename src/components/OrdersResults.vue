@@ -3,7 +3,7 @@ import { BellRing, Eye, Mail, Phone, UserRound } from '@lucide/vue'
 import { useRoute } from 'vue-router'
 import type { Order } from '@/types/api'
 
-defineProps<{ orders: Order[]; lotNumber: string }>()
+defineProps<{ orders: Order[]; alertLotNumber: string }>()
 const emit = defineEmits<{ alert: [order: Order] }>()
 const route = useRoute()
 
@@ -49,8 +49,10 @@ function detailQuery() {
           <td>{{ order.purchase_date }}</td>
           <td>
             <div class="medication-cell">
-              <strong>{{ order.items[0]?.medication.name }}</strong>
-              <span class="lot-badge">Lot {{ lotNumber }}</span>
+              <div v-for="item in order.items" :key="item.id">
+                <strong>{{ item.medication.name }}</strong>
+                <span class="lot-badge">Lot {{ item.medication.lot_number }}</span>
+              </div>
             </div>
           </td>
           <td>
@@ -66,7 +68,8 @@ function detailQuery() {
                 class="table-action table-action--warning"
                 type="button"
                 :aria-label="`Alert buyer ${order.customer.name}`"
-                title="Alert buyer"
+                :title="alertLotNumber ? 'Alert buyer' : 'Filter by lot number to send an alert'"
+                :disabled="!alertLotNumber"
                 @click="emit('alert', order)"
               >
                 <BellRing :size="16" /> Alert Buyer
@@ -92,10 +95,12 @@ function detailQuery() {
       <article v-for="order in orders" :key="order.id" class="order-card">
         <header>
           <span class="order-card__id">Order #{{ order.id }}</span>
-          <span class="lot-badge">Lot {{ lotNumber }}</span>
         </header>
         <h3>{{ order.customer.name }}</h3>
-        <p>{{ order.items[0]?.medication.name }}</p>
+        <p v-for="item in order.items" :key="item.id">
+          {{ item.medication.name }}
+          <span class="lot-badge">Lot {{ item.medication.lot_number }}</span>
+        </p>
         <dl>
           <div>
             <dt>Purchase date</dt>
@@ -119,6 +124,8 @@ function detailQuery() {
           <button
             class="button button--warning button--small"
             type="button"
+            :title="alertLotNumber ? 'Alert buyer' : 'Filter by lot number to send an alert'"
+            :disabled="!alertLotNumber"
             @click="emit('alert', order)"
           >
             <BellRing :size="15" /> Alert Buyer

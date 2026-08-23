@@ -16,16 +16,23 @@ export async function searchMedications(lotNumber: string) {
 }
 
 export async function searchOrders(filters: SearchFilters) {
-  const response = await http.get<PaginatedResource<Order>>('/api/orders', { params: filters })
+  const response = await http.get<PaginatedResource<Order>>('/api/orders', {
+    params: {
+      ...(filters.lot_number && { lot_number: filters.lot_number }),
+      ...(filters.start_date && { start_date: filters.start_date }),
+      ...(filters.end_date && { end_date: filters.end_date }),
+      ...(filters.page > 1 && { page: filters.page }),
+    },
+  })
   return response.data
 }
 
 export async function exportOrders(filters: SearchFilters) {
   const response = await http.get<Blob>('/api/orders/export', {
     params: {
-      lot_number: filters.lot_number,
-      start_date: filters.start_date,
-      end_date: filters.end_date,
+      ...(filters.lot_number && { lot_number: filters.lot_number }),
+      ...(filters.start_date && { start_date: filters.start_date }),
+      ...(filters.end_date && { end_date: filters.end_date }),
     },
     responseType: 'blob',
   })

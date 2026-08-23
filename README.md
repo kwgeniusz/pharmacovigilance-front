@@ -61,7 +61,7 @@ The HTTP client also handles these responses:
 - `419`: obtains a new CSRF cookie and retries the request once.
 - `422`: exposes Laravel validation errors to the corresponding form.
 
-The order search sends `lot_number`, `start_date`, `end_date`, and `page`. Paginated responses use Laravel's `data`, `links`, and `meta` fields.
+The order list loads without filters by default. When supplied, `lot_number`, `start_date`, and `end_date` are sent as optional filters; `page` is included after navigating away from the first page. Paginated responses use Laravel's `data`, `links`, and `meta` fields.
 
 The authenticated user has an `administrator` or `operator` role. Only administrators see the CSV export action. The API returns `403` if an operator calls the export endpoint. The downloaded file uses the active filters and includes all matching orders.
 
